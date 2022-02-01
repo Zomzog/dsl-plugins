@@ -15,46 +15,53 @@ public class PlantUMLEncoderPlugin implements StructurizrDslPlugin {
 
     @Override
     public void run(StructurizrDslPluginContext context) {
-        String url = context.getParameter("plantuml.url", "https://www.plantuml.com/plantuml");
-
         try {
             Workspace workspace = context.getWorkspace();
             for (Section section : workspace.getDocumentation().getSections()) {
-                String content = section.getContent();
-
-                StringBuilder buf = new StringBuilder();
-                String[] lines = content.split("\\r?\\n");
-                StringBuilder rawPlantUML = null;
-                for (String line : lines) {
-                    line = line.trim();
-
-                    if (line.equals("```plantuml")) {
-                        rawPlantUML = new StringBuilder();
-                    } else if (rawPlantUML != null && line.equals("```")) {
-                        String encodedPlantUML = new PlantUMLEncoder().encode(rawPlantUML.toString());
-
-                        if (section.getFormat() == Format.AsciiDoc) {
-                            buf.append(String.format(ASCIIDOC_IMAGE_TEMPLATE, url, PLANTUML_FORMAT, encodedPlantUML));
-                        } else {
-                            buf.append(String.format(MARKDOWN_IMAGE_TEMPLATE, url, PLANTUML_FORMAT, encodedPlantUML));
-                        }
-
-                        buf.append(System.lineSeparator());
-                        rawPlantUML = null;
-                    } else if (rawPlantUML != null) {
-                        rawPlantUML.append(line);
-                        rawPlantUML.append(System.lineSeparator());
-                    } else {
-                        buf.append(line);
-                        buf.append(System.lineSeparator());
-                    }
-                }
-
-                section.setContent(buf.toString());
+                section.setContent(encodePlantUML(context, section.getContent(), section.getFormat()));
             }
+
+//            for (Decision decision : workspace.getDocumentation().getDecisions()) {
+//                decision.setContent(encodePlantUML(context, decision.getContent(), decision.getFormat()));
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private String encodePlantUML(StructurizrDslPluginContext context, String content, Format format) throws Exception {
+        String url = context.getParameter("plantuml.url", "https://www.plantuml.com/plantuml");
+
+        StringBuilder buf = new StringBuilder();
+        String[] lines = content.split("\\r?\\n");
+        StringBuilder rawPlantUML = null;
+        for (String line : lines) {
+            line = line.trim();
+
+            if (line.equals("```plantuml")) {
+                rawPlantUML = new StringBuilder();
+            } else if (rawPlantUML != null && line.equals("```")) {
+                String encodedPlantUML = new PlantUMLEncoder().encode(rawPlantUML.toString());
+
+                if (format == Format.AsciiDoc) {
+                    buf.append(String.format(ASCIIDOC_IMAGE_TEMPLATE, url, PLANTUML_FORMAT, encodedPlantUML));
+                } else {
+                    buf.append(String.format(MARKDOWN_IMAGE_TEMPLATE, url, PLANTUML_FORMAT, encodedPlantUML));
+                }
+
+                buf.append(System.lineSeparator());
+                rawPlantUML = null;
+            } else if (rawPlantUML != null) {
+                rawPlantUML.append(line);
+                rawPlantUML.append(System.lineSeparator());
+            } else {
+                buf.append(line);
+                buf.append(System.lineSeparator());
+            }
+        }
+
+        return buf.toString();
+    }
+
 
 }
