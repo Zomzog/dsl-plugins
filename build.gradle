@@ -1,0 +1,19 @@
+plugins {
+	id 'java'
+}
+
+description = 'Structurizr DSL plugins'
+group = 'com.structurizr'
+version = '1.0.0'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	implementation 'com.structurizr:structurizr-client:1.10.1'
+	implementation 'com.structurizr:structurizr-dsl:1.18.0'
+
+}
