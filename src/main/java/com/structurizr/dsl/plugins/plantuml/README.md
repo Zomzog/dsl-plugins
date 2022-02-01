@@ -30,3 +30,13 @@ Add the plugin, and reference it from your DSL file as follows:
 ```
 
 This should appear after any `!docs` and/or `!adrs` statements that import documentation into your workspace.
+
+By default, the public PlantUML installation (`https://www.plantuml.com/plantuml`) will be used, but you can specify a parameter to change this:
+
+```
+!plugin com.structurizr.dsl.plugins.plantuml.PlantUMLEncoderPlugin {
+    "plantuml.url" "http://localhost:8080/plantuml"
+}
+```
+
+
