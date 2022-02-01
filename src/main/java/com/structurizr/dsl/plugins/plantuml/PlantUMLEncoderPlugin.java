@@ -1,11 +1,17 @@
 package com.structurizr.dsl.plugins.plantuml;
 
 import com.structurizr.Workspace;
+import com.structurizr.documentation.Format;
 import com.structurizr.documentation.Section;
 import com.structurizr.dsl.StructurizrDslPlugin;
 import com.structurizr.dsl.StructurizrDslPluginContext;
 
 public class PlantUMLEncoderPlugin implements StructurizrDslPlugin {
+
+    private static final String MARKDOWN_IMAGE_TEMPLATE = "![](%s/%s/%s)";
+    private static final String ASCIIDOC_IMAGE_TEMPLATE = "image::%s/%s/%s[]";
+
+    private static final String PLANTUML_FORMAT = "svg";
 
     @Override
     public void run(StructurizrDslPluginContext context) {
@@ -26,7 +32,13 @@ public class PlantUMLEncoderPlugin implements StructurizrDslPlugin {
                         rawPlantUML = new StringBuilder();
                     } else if (rawPlantUML != null && line.equals("```")) {
                         String encodedPlantUML = new PlantUMLEncoder().encode(rawPlantUML.toString());
-                        buf.append(String.format("![](%s/%s/%s)", url, "svg", encodedPlantUML));
+
+                        if (section.getFormat() == Format.AsciiDoc) {
+                            buf.append(String.format(ASCIIDOC_IMAGE_TEMPLATE, url, PLANTUML_FORMAT, encodedPlantUML));
+                        } else {
+                            buf.append(String.format(MARKDOWN_IMAGE_TEMPLATE, url, PLANTUML_FORMAT, encodedPlantUML));
+                        }
+
                         buf.append(System.lineSeparator());
                         rawPlantUML = null;
                     } else if (rawPlantUML != null) {

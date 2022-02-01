@@ -19,7 +19,15 @@ public class PlantUMLEncoderPluginTests {
         Workspace workspace = new Workspace("Name", "Description");
 
         StructurizrDocumentationTemplate template = new StructurizrDocumentationTemplate(workspace);
-        Section section = template.addContextSection(null, Format.Markdown, "## Context\n" +
+        Section markdown = template.addSection("Markdown", Format.Markdown, "## Context\n" +
+                "\n" +
+                "```plantuml\n" +
+                "@startuml\n" +
+                "Bob -> Alice : hello\n" +
+                "@enduml\n" +
+                "```");
+
+        Section asciidoc = template.addSection("AsciiDoc", Format.AsciiDoc, "== Context\n" +
                 "\n" +
                 "```plantuml\n" +
                 "@startuml\n" +
@@ -33,7 +41,11 @@ public class PlantUMLEncoderPluginTests {
 
         assertEquals("## Context\n" +
                 "\n" +
-                "![](https://www.plantuml.com/plantuml/svg/SoWkIImgAStDuNBAJrBGjLDmpCbCJbMmKiX8pSd9vt98pKi1IG80)\n", section.getContent());
+                "![](https://www.plantuml.com/plantuml/svg/SoWkIImgAStDuNBAJrBGjLDmpCbCJbMmKiX8pSd9vt98pKi1IG80)\n", markdown.getContent());
+
+        assertEquals("== Context\n" +
+                "\n" +
+                "image::https://www.plantuml.com/plantuml/svg/SoWkIImgAStDuNBAJrBGjLDmpCbCJbMmKiX8pSd9vt98pKi1IG80[]\n", asciidoc.getContent());
     }
 
 }
