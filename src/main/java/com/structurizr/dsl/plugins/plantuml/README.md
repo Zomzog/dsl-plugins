@@ -3,11 +3,13 @@
 This Structurizr DSL plugin looks for inline PlantUML diagram definitions in Markdown/AsciiDoc documentation,
 and encodes them as images. For example, this definition in Markdown content:
 
+````
 ```plantuml
 @startuml
 Bob -> Alice : hello
 @enduml
-```
+``` 
+````
 
 Will be converted to:
 
