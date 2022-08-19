@@ -6,6 +6,7 @@ import com.structurizr.documentation.Format;
 import com.structurizr.documentation.Section;
 import com.structurizr.dsl.StructurizrDslPlugin;
 import com.structurizr.dsl.StructurizrDslPluginContext;
+import com.structurizr.model.SoftwareSystem;
 
 public class MermaidEncoderPlugin implements StructurizrDslPlugin {
 
@@ -22,8 +23,20 @@ public class MermaidEncoderPlugin implements StructurizrDslPlugin {
                 section.setContent(encodeMermaid(context, section.getContent(), section.getFormat()));
             }
 
+            for (SoftwareSystem softwareSystem : workspace.getModel().getSoftwareSystems()) {
+                for (Section section : softwareSystem.getDocumentation().getSections()) {
+                    section.setContent(encodeMermaid(context, section.getContent(), section.getFormat()));
+                }
+            }
+
             for (Decision decision : workspace.getDocumentation().getDecisions()) {
                 decision.setContent(encodeMermaid(context, decision.getContent(), decision.getFormat()));
+            }
+
+            for (SoftwareSystem softwareSystem : workspace.getModel().getSoftwareSystems()) {
+                for (Decision decision : softwareSystem.getDocumentation().getDecisions()) {
+                    decision.setContent(encodeMermaid(context, decision.getContent(), decision.getFormat()));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
