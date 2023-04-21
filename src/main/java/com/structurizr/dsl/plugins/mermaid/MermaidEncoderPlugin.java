@@ -1,9 +1,7 @@
 package com.structurizr.dsl.plugins.mermaid;
 
 import com.structurizr.Workspace;
-import com.structurizr.documentation.Decision;
-import com.structurizr.documentation.Format;
-import com.structurizr.documentation.Section;
+import com.structurizr.documentation.*;
 import com.structurizr.dsl.StructurizrDslPlugin;
 import com.structurizr.dsl.StructurizrDslPluginContext;
 import com.structurizr.model.SoftwareSystem;
@@ -17,34 +15,38 @@ public class MermaidEncoderPlugin implements StructurizrDslPlugin {
 
     @Override
     public void run(StructurizrDslPluginContext context) {
+        System.out.println("Start mermaid encoder plugin");
+        String rootUrl = context.getParameter("mermaid.url", "https://mermaid.ink");
         try {
             Workspace workspace = context.getWorkspace();
-            for (Section section : workspace.getDocumentation().getSections()) {
-                section.setContent(encodeMermaid(context, section.getContent(), section.getFormat()));
-            }
-
+            updateDocuments(workspace, rootUrl);
             for (SoftwareSystem softwareSystem : workspace.getModel().getSoftwareSystems()) {
-                for (Section section : softwareSystem.getDocumentation().getSections()) {
-                    section.setContent(encodeMermaid(context, section.getContent(), section.getFormat()));
-                }
-            }
+                updateDocuments(softwareSystem, rootUrl);
+                softwareSystem.getContainers().forEach(container -> {
+                    updateDocuments(container, rootUrl);
+                    container.getComponents().forEach(component -> {
+                        updateDocuments(component, rootUrl);
+                    });
+                });
 
-            for (Decision decision : workspace.getDocumentation().getDecisions()) {
-                decision.setContent(encodeMermaid(context, decision.getContent(), decision.getFormat()));
-            }
-
-            for (SoftwareSystem softwareSystem : workspace.getModel().getSoftwareSystems()) {
-                for (Decision decision : softwareSystem.getDocumentation().getDecisions()) {
-                    decision.setContent(encodeMermaid(context, decision.getContent(), decision.getFormat()));
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private String encodeMermaid(StructurizrDslPluginContext context, String content, Format format) throws Exception {
-        String url = context.getParameter("mermaid.url", "https://mermaid.ink");
+   private void updateDocuments(Documentable item, String mermaidUrl) {
+        item.getDocumentation() .getSections()
+                .forEach(section -> updateDocuments(section, mermaidUrl));
+        item.getDocumentation().getDecisions()
+                .forEach(decision -> updateDocuments(decision, mermaidUrl));
+   }
+
+   private void updateDocuments(DocumentationContent content, String mermaidUrl) {
+        content.setContent(encodeMermaid(mermaidUrl, content.getContent(), content.getFormat()));
+   }
+
+    private String encodeMermaid(String url, String content, Format format) {
 
         StringBuilder buf = new StringBuilder();
         String[] lines = content.split("\\r?\\n");
@@ -53,10 +55,11 @@ public class MermaidEncoderPlugin implements StructurizrDslPlugin {
             line = line.trim();
 
             if (line.equals("```mermaid")) {
+                System.out.println("Start new mermaid");
                 rawMermaid = new StringBuilder();
             } else if (rawMermaid != null && line.equals("```")) {
                 String encodedMermaid = new MermaidEncoder().encode(rawMermaid.toString());
-
+                System.out.println("encodedMermaid = " + encodedMermaid);
                 if (format == Format.AsciiDoc) {
                     buf.append(String.format(ASCIIDOC_IMAGE_TEMPLATE, url, MERMAID_FORMAT, encodedMermaid));
                 } else {

@@ -4,17 +4,18 @@ plugins {
 
 description = 'Structurizr DSL plugins'
 group = 'com.structurizr'
-version = '1.0.0'
+version = '1.1.0'
 
 sourceCompatibility = '1.11'
 targetCompatibility = '1.11'
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 }
 
 dependencies {
-	implementation 'com.structurizr:structurizr-dsl:1.20.0'
+	implementation 'com.structurizr:structurizr-dsl:1.30.1'
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
 }
 
